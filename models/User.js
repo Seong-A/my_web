@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+const jwt = require('jsonwebtoken');
 
 const userSchema = mongoose.Schema({
     name: {
@@ -31,6 +34,51 @@ const userSchema = mongoose.Schema({
     }
 
 })
+
+userSchema.pre('save', function(next) {
+    var user = this;
+
+    if(user.isModified('password')){
+        //비밀번호 암호화
+        bcrypt.genSalt(saltRounds, function(err, salt) {
+            if(err) return next(err)
+
+            bcrypt.hash(user.password, salt, function(err, hash) {
+                if(err) return next(err)
+                user.password = hash
+                next()
+            })
+        })
+    } else {
+        next()
+    }
+})
+
+userSchema.methods.comparePassword = function (plainPassword) {
+    const user = this;
+  
+    return new Promise((resolve, reject) => {
+      bcrypt.compare(plainPassword, user.password, (err, isMatch) => {
+        if (err) return reject(err);
+        resolve(isMatch);
+      });
+    });
+  };
+  
+
+  userSchema.methods.generateToken = async function () {
+    const user = this;
+    const token = jwt.sign(user._id.toString(), 'secretToken');
+    user.token = token;
+  
+    try {
+      await user.save();
+      return user;
+    } catch (err) {
+      throw err;
+    }
+  };
+  
 
 const User = mongoose.model('User',userSchema)
 
