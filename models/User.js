@@ -69,8 +69,10 @@ userSchema.methods.comparePassword = function (plainPassword) {
   userSchema.methods.generateToken = async function () {
     const user = this;
     const token = jwt.sign(user._id.toString(), 'secretToken');
+
+
     user.token = token;
-  
+    
     try {
       await user.save();
       return user;
@@ -78,6 +80,23 @@ userSchema.methods.comparePassword = function (plainPassword) {
       throw err;
     }
   };
+  
+  userSchema.statics.findByToken = function (token) {
+    var user = this;
+  
+    // 프로미스 반환
+    return new Promise((resolve, reject) => {
+      // 토큰을 decode
+      jwt.verify(token, 'secretToken', function (err, decoded) {
+        if (err) return reject(err);
+        
+        // findOne 메서드를 프로미스로 사용
+        user.findOne({ "_id": decoded, "token": token })
+          .then(user => resolve(user))
+          .catch(err => reject(err));
+      });
+    });
+  }
   
 
 const User = mongoose.model('User',userSchema)
