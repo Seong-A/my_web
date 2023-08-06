@@ -11,7 +11,7 @@ const config = require('./config/key.js');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.user(auth);
+app.user = (auth) => {};
 
 const mongoose = require('mongoose');
 mongoose
