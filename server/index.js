@@ -1,22 +1,23 @@
 const express = require('express');
 const app = express();
-const port = 3000;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const { auth } = require("./middleware/auth.js");
-const { User } = require("./models/User");
+const { auth } = require('./middleware/auth.js');
+const { User } = require("./models/User.js");
 
-const config = require('./config/key');
+const config = require('./config/key.js');
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.user(auth);
 
 const mongoose = require('mongoose');
 mongoose
   .connect(config.mongoURI, {
     useNewUrlParser: true,
-    useUnifiedTopology: true, // 이 옵션을 추가해 주세요.
+    useUnifiedTopology: true, 
   })
   .then(() => console.log('MongoDB Connected...'))
   .catch(err => console.log(err));
@@ -24,6 +25,10 @@ mongoose
 app.get('/', (req, res) => {console.log(req.cookies);
 res.send('Hello World! 야호')
 });
+
+app.get('/api/hello', (req,res) => {
+  res.send("안녕하세요")
+})
 
 app.post('/api/users/register', async (req, res) => { 
   try {
@@ -92,5 +97,5 @@ app.get('/api/users/logout', auth, async (req, res) => {
   }
 });
 
-
+const port = 5000;
 app.listen(port, () => console.log(`Example app listening on port ${port}`));
