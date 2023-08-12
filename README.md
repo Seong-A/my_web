@@ -6,3 +6,6 @@
 1. Fronted: React
 2. Backend: Node.js + Express.js
 3. Code Editor: VS Code
+
+
+--- 현재 React와 Redux 버전 호환성 문제 해결 중..
